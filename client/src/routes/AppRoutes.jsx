@@ -1,36 +1,82 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import Login from "../pages/Auth/Login";
+import Register from "../pages/Auth/Register";
+import ProtectedLayout from "../layouts/ProtectedLayout";
+import AdminOnly from "../guards/AdminOnly";
+import EmployeeOnly from "../guards/EmployeeOnly";
+
+import AdminLayout from "../layouts/AdminLayout";
+import EmployeeLayout from "../layouts/EmployeeLayout";
+
+// Admin Pages
+import AdminDashboard from "../pages/Dashboard/AdminDashboard";
+import EmployeeList from "../pages/Employees/EmployeeList";
+import CreateEmployee from "../pages/Employees/CreateEmployee";
+import DepartmentList from "../pages/Departments/DepartmentList";
+import AddDepartment from "../pages/Departments/AddDepartment";
+import ApproveRejectLeave from "../pages/Leaves/ApproveRejectLeave";
+import AssignTask from "../pages/Tasks/AssignTask";
+import ReportPage from "../pages/Reports/ReportPage";
+
+// Employee Pages
+import EmployeeDashboard from "../pages/Dashboard/EmployeeDashboard";
+import ApplyLeave from "../pages/Leaves/ApplyLeave";
+import LeaveList from "../pages/Leaves/LeaveList";
+import MarkAttendance from "../pages/Attendance/MarkAttendance";
+import MyAttendance from "../pages/Attendance/MyAttendance";
+import TaskList from "../pages/Tasks/TaskList";
+
+import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* Redirect root to login */}
+      <Route path="/" element={<Navigate to="/login" />} />
+
+      {/* Public Routes */}
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-      {/* Protected Layout */}
+      {/* Protected Routes */}
       <Route element={<ProtectedLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
-
-        {/* Admin Routes */}
+        {/* Admin-Only Routes */}
         <Route element={<AdminOnly />}>
-          <Route path="/employees" element={<EmployeeList />} />
-          <Route path="/departments" element={<Departments />} />
-          <Route path="/leaves" element={<LeaveRequests />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/attendance" element={<Attendance />} />
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/employees" element={<EmployeeList />} />
+            <Route
+              path="/admin/employees/create"
+              element={<CreateEmployee />}
+            />
+            <Route path="/admin/departments" element={<DepartmentList />} />
+            <Route
+              path="/admin/departments/create"
+              element={<AddDepartment />}
+            />
+            <Route path="/admin/leaves" element={<ApproveRejectLeave />} />
+            <Route path="/admin/tasks/create" element={<AssignTask />} />
+            <Route path="/admin/reports" element={<ReportPage />} />
+          </Route>
         </Route>
 
-        {/* Employee Routes */}
+        {/* Employee-Only Routes */}
         <Route element={<EmployeeOnly />}>
-          <Route path="/my-leaves" element={<MyLeaves />} />
-          <Route path="/my-tasks" element={<MyTasks />} />
-          <Route path="/my-attendance" element={<MyAttendance />} />
+          <Route element={<EmployeeLayout />}>
+            <Route path="/dashboard" element={<EmployeeDashboard />} />
+            <Route path="/leave/apply" element={<ApplyLeave />} />
+            <Route path="/leave/my" element={<LeaveList />} />
+            <Route path="/attendance" element={<MarkAttendance />} />
+            <Route path="/attendance/view" element={<MyAttendance />} />
+            <Route path="/tasks" element={<TaskList />} />
+          </Route>
         </Route>
       </Route>
 
+      {/* Catch-all */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
-
 
 export default AppRoutes;
