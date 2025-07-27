@@ -16,7 +16,7 @@ export const login = async (req, res) => {
   const isMatch = await bcrypt.compare(password, user.passwordHash);
   if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
-  setTokenAndCookie(user, res); // Sets jwt cookie
+  const token = setTokenAndCookie(user, res); // Sets jwt cookie
 
   res.status(200).json({
     message: "Login successful",
@@ -25,6 +25,7 @@ export const login = async (req, res) => {
       username: user.username,
       role: user.role,
     },
+    token,
   });
 };
 

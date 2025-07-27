@@ -13,8 +13,10 @@ export const setTokenAndCookie = (user, res) => {
 
   res.cookie("jwt", token, {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    httpOnly: true,                  // Prevents JS access
-    sameSite: "strict",              // CSRF protection
+    httpOnly: true, // Prevents JS access
+    sameSite: "strict", // CSRF protection
     secure: process.env.NODE_ENV === "production", // HTTPS-only in prod
   });
+
+  return token;
 };
