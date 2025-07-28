@@ -11,7 +11,7 @@ const Register = () => {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
         <h2 className="text-2xl font-bold text-center text-black mb-6">
-          Employee Login
+           Login
         </h2>
 
         <form onSubmit={handleSubmit}>
