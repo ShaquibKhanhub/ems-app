@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { login } from "../../services/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -16,13 +17,15 @@ const Login = () => {
 
     try {
       const res = await login({ username, password });
-      console.log("Login Success:", res);
 
       if (res?.user?.role === "Admin") {
+        localStorage.setItem("admin-token", res.token); // ✅ Store token
         navigate("/admin/dashboard");
       } else {
         navigate("/dashboard");
       }
+toast.success("Login successful!");
+      localStorage.setItem("employee", JSON.stringify(res.user)); // Common for both
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     }

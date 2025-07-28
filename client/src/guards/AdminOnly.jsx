@@ -1,9 +1,13 @@
-import React from 'react'
+import { Navigate, Outlet } from "react-router-dom";
 
 const AdminOnly = () => {
-  return (
-    <div>AdminOnly</div>
-  )
-}
+  const user = JSON.parse(localStorage.getItem("employee"));
 
-export default AdminOnly
+  if (!user || user.role !== "Admin") {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
+};
+
+export default AdminOnly;

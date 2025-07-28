@@ -1,9 +1,14 @@
-import React from 'react'
+import { Outlet } from "react-router-dom";
 
 const ProtectedLayout = () => {
-  return (
-    <div>ProtectedLayout</div>
-  )
-}
+  // You can also check auth here or use context
 
-export default ProtectedLayout
+  return (
+    <>
+      {/* Optional: Add a header or wrapper here */}
+      <Outlet /> {/* This renders the nested child routes */}
+    </>
+  );
+};
+
+export default ProtectedLayout;

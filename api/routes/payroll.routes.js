@@ -16,7 +16,7 @@ router.use(protect);
 router.post("/generate", protect, isAdmin, generatePayroll);
 
 // ✅ Get all payrolls for an employee
-router.get("/employee/:id", protect, getPayrollByEmployee);
+router.get("/employee/:id", protect , getPayrollByEmployee );
 
 // ✅ Get all payrolls (Admin)
 router.get("/", protect, isAdmin, getAllPayrolls);

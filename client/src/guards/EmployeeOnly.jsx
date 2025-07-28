@@ -1,9 +1,13 @@
-import React from 'react'
+import React from "react";
 
 const EmployeeOnly = () => {
-  return (
-    <div>EmployeeOnly</div>
-  )
-}
+  const user = JSON.parse(localStorage.getItem("employee"));
 
-export default EmployeeOnly
+  if (!user || user.role !== "Employee") {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
+};
+
+export default EmployeeOnly;
