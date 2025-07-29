@@ -1,6 +1,17 @@
 import Leave from "../models/leave.model.js";
 import { sendEmail } from "../utils/email.js";
 
+// leave.controller.js
+
+export const getAllLeaves = async (req, res) => {
+  try {
+    const leaves = await Leave.find(); 
+    res.json(leaves);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch leaves", error });
+  }
+};
+
 export const applyLeave = async (req, res) => {
   const leave = await Leave.create(req.body);
   res.status(201).json(leave);

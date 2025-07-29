@@ -26,9 +26,10 @@ export const createEmployee = async (req, res) => {
 };
 
 export const getAllEmployees = async (req, res) => {
-  const employees = await Employee.find().populate("department");
+  const employees = await Employee.find().populate("department", "name");
   res.json(employees);
 };
+
 
 export const getEmployeeById = async (req, res) => {
   const employee = await Employee.findById(req.params.id).populate(
