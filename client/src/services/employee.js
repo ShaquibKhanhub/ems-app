@@ -11,3 +11,8 @@ export const deleteEmployee = async (id) => {
   const res = await instance.delete(`/employees/${id}`);
   return res.data;
 };
+
+export const updateEmployee = async (id, data) => {
+  const res = await instance.patch(`/employees/${id}`, data);
+  return res.data;
+};

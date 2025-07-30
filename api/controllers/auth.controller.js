@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import Employee from "../models/employee.model.js";
 import bcrypt from "bcrypt";
 import { setTokenAndCookie } from "../utils/jwt.js";
 import { sendEmail } from "../utils/email.js";
@@ -44,6 +45,11 @@ export const register = async (req, res) => {
   const passwordHash = await bcrypt.hash(password, 10);
 
   const user = await User.create({ username, passwordHash, role, employeeId });
+
+  // ✅ Fix applied here
+  await Employee.findByIdAndUpdate(employeeId, {
+    userId: user._id,
+  });
 
   res.status(201).json({
     message: "User registered successfully",
