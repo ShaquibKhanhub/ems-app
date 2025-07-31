@@ -27,7 +27,7 @@ export const fetchPendingLeavesCount = async () => {
   const pendingCount = allLeaves.filter(
     (leave) => leave.status === "Pending"
   ).length;
-    console.log("Pending leaves count:", pendingCount);
+  console.log("Pending leaves count:", pendingCount);
   return pendingCount;
 };
 
@@ -40,5 +40,10 @@ export const fetchTaskPerformance = async () => {
 // Optional: get employee by department data
 export const fetchEmployeesByDepartment = async () => {
   const res = await instance.get("/reports/leaves"); // If this endpoint is for department stats
+  return res.data;
+};
+
+export const deleteUser = async (userId) => {
+  const res = await instance.delete(`/admin/${userId}`);
   return res.data;
 };

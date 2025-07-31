@@ -14,5 +14,6 @@ export const deleteEmployee = async (id) => {
 
 export const updateEmployee = async (id, data) => {
   const res = await instance.patch(`/employees/${id}`, data);
+ 
   return res.data;
 };

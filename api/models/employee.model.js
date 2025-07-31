@@ -14,6 +14,7 @@ const employeeSchema = new mongoose.Schema({
   gender: String,
   address: String,
   department: { type: mongoose.Schema.Types.ObjectId, ref: 'Department' },
+  imageUrl: String,
   documents: [String],
   createdAt: { type: Date, default: Date.now }
 });

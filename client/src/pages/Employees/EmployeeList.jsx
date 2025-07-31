@@ -1,14 +1,32 @@
 import { useEffect, useState } from "react";
 import {
-  fetchEmployees,
   deleteEmployee,
+  fetchEmployees,
   updateEmployee,
 } from "../../services/employee";
+import { toast } from "react-toastify";
+import avatar from "../../../public/simple-user-default-icon-free-png.webp";
+import { LuPlus } from "react-icons/lu";
+import { deleteUser } from "../../services/adminDashboard";
+import instance from "../../services/axios";
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
   const [editData, setEditData] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    dob: "",
+    gender: "",
+    address: "",
+    department: "",
+    photo: null,
+    documents: [],
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -19,58 +37,224 @@ const EmployeeList = () => {
   }, []);
 
   const handleDelete = async () => {
-    await deleteEmployee(deleteId);
-    setEmployees(employees.filter((emp) => emp._id !== deleteId));
-    setDeleteId(null);
+    try {
+      if (deleteId?.userId?._id) {
+        // If userId is present, delete from /admin route (will delete both user + employee)
+        await deleteUser(deleteId.userId._id); // ✅ Correct — but ensure the backend route also deletes employee by userId
+        setEmployees((prev) => prev.filter((emp) => emp._id !== deleteId._id));
+      } else {
+        // If no userId, delete only the employee from /employees route
+        await deleteEmployee(deleteId._id);
+      }
+
+      toast.success("Employee deleted successfully");
+
+      // Update state
+      setEmployees((prev) => prev.filter((emp) => emp._id !== deleteId._id));
+    } catch (err) {
+      toast.error("Failed to delete employee");
+      console.error(err);
+    } finally {
+      setDeleteId(null);
+    }
   };
 
-  const handleEditChange = (field, value) => {
-    setEditData((prev) => ({ ...prev, [field]: value }));
+  const handleEditClick = (emp) => {
+    setEditData(emp);
+    setFormData({
+      fullName: emp.fullName || "",
+      email: emp.email || "",
+      phone: emp.phone || "",
+    });
   };
 
   const handleEditSave = async () => {
-    const updated = await updateEmployee(editData._id, editData);
-    setEmployees((prev) =>
-      prev.map((emp) => (emp._id === updated._id ? updated : emp))
-    );
-    setEditData(null);
+    try {
+      await updateEmployee(editData._id, formData);
+      const updated = employees.map((emp) =>
+        emp._id === editData._id ? { ...emp, ...formData } : emp
+      );
+      setEmployees(updated);
+      toast.success("Employee updated successfully");
+      setEditData(null);
+    } catch (error) {
+      toast.error("Failed to update employee");
+      console.error(error);
+    }
+  };
+
+  const handleCreateEmployee = async () => {
+    if (!formData.email.trim()) {
+      toast.error("Email is required");
+      return;
+    }
+
+    const form = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === "documents" && value.length > 0) {
+        value.forEach((file) => form.append("documents", file));
+      } else if (key === "photo" && value) {
+        form.append("photo", value);
+      } else if (value) {
+        form.append(key, value);
+      }
+    });
+
+    console.log("formData values:", formData);
+
+    try {
+      const { data } = await instance.post("/employees/", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setEmployees((prev) => [...prev, data.employee]);
+      toast.success("Employee created");
+      setShowCreateModal(false);
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        dob: "",
+        gender: "",
+        address: "",
+        department: "",
+        photo: null,
+        documents: [],
+      });
+    } catch (err) {
+      console.error("Upload error:", err.response?.data || err.message);
+      toast.error("Failed to create employee");
+    }
   };
 
   return (
-    <div className="text-white space-y-4">
-      <h2 className="text-2xl font-bold mb-4 text-black">Employee List</h2>
+    <div className="p-6 text-white space-y-4">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold text-neutral-800">
+          Employee List
+        </h2>
+        <button
+          className="flex items-center gap-2 bg-[#1f1f1f] text-white px-4 py-2 rounded-full hover:bg-[#2a2a2a] transition"
+          onClick={() => setShowCreateModal(true)}
+        >
+          <LuPlus size={18} />
+          Create
+        </button>
 
-      <div className="overflow-x-auto rounded shadow border border-gray-700 bg-black">
+        {showCreateModal && (
+          <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-60 z-50">
+            <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-2xl w-[90%] max-w-md text-white space-y-4">
+              <h2 className="text-xl font-semibold">Create Employee</h2>
+
+              <input
+                type="email"
+                placeholder="Email *"
+                className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="Full Name"
+                className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
+                value={formData.fullName}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="Phone"
+                className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
+              />
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setFormData({ ...formData, photo: e.target.files[0] })
+                }
+                className="w-full text-sm"
+              />
+
+              <input
+                type="file"
+                multiple
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    documents: Array.from(e.target.files),
+                  })
+                }
+                className="w-full text-sm"
+              />
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  className="px-4 py-2 rounded border border-neutral-700 bg-[#1a1a1a] hover:bg-[#2a2a2a]"
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 rounded bg-white text-black hover:bg-neutral-200"
+                  onClick={handleCreateEmployee}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-neutral-800 bg-[#111]">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-900 text-gray-300 text-left">
+          <thead className="bg-[#0d0d0d] text-neutral-400">
             <tr>
-              <th className="p-4">Name</th>
-              <th className="p-4">Email</th>
-              <th className="p-4">Role</th>
-              <th className="p-4">Department</th>
-              <th className="p-4 text-center">Actions</th>
+              <th className="px-6 py-3 text-left">Name</th>
+              <th className="px-6 py-3 text-left">Email</th>
+              <th className="px-6 py-3 text-left">Role</th>
+              <th className="px-6 py-3 text-left">Department</th>
+              <th className="px-6 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {employees.map((emp) => (
               <tr
                 key={emp._id}
-                className="border-t border-gray-800 hover:bg-gray-800"
+                className="border-t border-neutral-800 hover:bg-neutral-900"
               >
-                <td className="p-4">{emp.fullName || "N/A"}</td>
-                <td className="p-4">{emp.email}</td>
-                <td className="p-4">{emp?.userId?.role || "N/A"}</td>
-                <td className="p-4">{emp?.department?.name || "N/A"}</td>
-                <td className="p-4 flex justify-center gap-3">
+                <td className="px-6 py-4 flex items-center gap-3">
+                  <img
+                    src={emp.photo || avatar}
+                    alt={emp.fullName}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  {emp.fullName || "N/A"}
+                </td>
+
+                <td className="px-6 py-4">{emp.email}</td>
+                <td className="px-6 py-4">{emp?.userId?.role || "N/A"}</td>
+                <td className="px-6 py-4">{emp?.department?.name || "N/A"}</td>
+                <td className="px-6 py-4 flex justify-center gap-3">
                   <button
-                    onClick={() => setEditData(emp)}
-                    className="px-3 py-1 bg-white text-black rounded hover:bg-gray-300"
+                    onClick={() => handleEditClick(emp)}
+                    className="px-3 py-1 bg-white text-black rounded hover:bg-neutral-200 transition"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => setDeleteId(emp._id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                    onClick={() => setDeleteId(emp)}
+                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
                   >
                     Delete
                   </button>
@@ -83,24 +267,25 @@ const EmployeeList = () => {
 
       {/* Delete Modal */}
       {deleteId && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded-lg shadow-md text-center text-white border border-gray-700">
-            <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
-            <p className="mb-6">
-              Are you sure you want to delete this employee?
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-xl w-[90%] max-w-sm text-white">
+            <h2 className="text-lg font-semibold mb-3">Confirm Deletion</h2>
+            <p className="text-sm text-neutral-400 mb-5">
+              Are you sure you want to delete {deleteId?.fullName}?
             </p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Delete
-              </button>
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteId(null)}
-                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+                className="px-4 py-2 bg-neutral-800 rounded hover:bg-neutral-700 transition"
               >
                 Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteId?.userId?._id)}
+                disabled={!deleteId?.userId?._id}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
+              >
+                Delete
               </button>
             </div>
           </div>
@@ -109,43 +294,49 @@ const EmployeeList = () => {
 
       {/* Edit Modal */}
       {editData && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-[#111] text-white p-6 rounded-xl border border-neutral-800 shadow-2xl w-full max-w-md space-y-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-2xl w-[90%] max-w-md text-white space-y-4">
             <h2 className="text-xl font-semibold">Edit Employee</h2>
 
             <input
-              className="w-full p-3 bg-[#1a1a1a] text-white rounded-md border border-neutral-700 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-white/10"
               type="text"
               placeholder="Full Name"
-              value={editData.fullName}
-              onChange={(e) => handleEditChange("fullName", e.target.value)}
+              className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
+              value={formData.fullName}
+              onChange={(e) =>
+                setFormData({ ...formData, fullName: e.target.value })
+              }
             />
 
             <input
-              className="w-full p-3 bg-[#1a1a1a] text-white rounded-md border border-neutral-700 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-white/10"
               type="email"
               placeholder="Email"
-              value={editData.email}
-              onChange={(e) => handleEditChange("email", e.target.value)}
+              className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
             />
 
             <input
-              className="w-full p-3 bg-[#1a1a1a] text-white rounded-md border border-neutral-700 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-white/10"
               type="text"
               placeholder="Phone"
-              value={editData.phone}
-              onChange={(e) => handleEditChange("phone", e.target.value)}
+              className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
             />
 
             <div className="flex justify-end gap-3 pt-2">
               <button
-                className="px-4 py-2 rounded-md border border-neutral-700 bg-[#1a1a1a] hover:bg-[#2a2a2a] transition"
+                className="px-4 py-2 rounded border border-neutral-700 bg-[#1a1a1a] hover:bg-[#2a2a2a]"
                 onClick={() => setEditData(null)}
               >
                 Cancel
               </button>
               <button
-                className="px-4 py-2 rounded-md bg-white text-black hover:bg-neutral-200 transition"
+                className="px-4 py-2 rounded bg-white text-black hover:bg-neutral-200"
                 onClick={handleEditSave}
               >
                 Save

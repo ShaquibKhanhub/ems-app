@@ -21,8 +21,8 @@ dotenv.config();
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "*",
-    credentials: true,
+    origin: "http://localhost:5173", 
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
   })
 );
 app.use(express.json());

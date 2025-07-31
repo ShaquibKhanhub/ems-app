@@ -17,7 +17,6 @@ export const sendToSingle = async (req, res) => {
 export const sendToAllEmployees = async (req, res) => {
   const { subject, html } = req.body;
   try {
-    
     const employees = await Employee.find({}, "email");
     const emails = employees.map((emp) => emp.email);
 
@@ -34,3 +33,6 @@ export const sendToAllEmployees = async (req, res) => {
     res.status(500).json({ success: false, message: "Bulk email failed" });
   }
 };
+
+
+
