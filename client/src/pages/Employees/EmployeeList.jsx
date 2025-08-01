@@ -9,6 +9,7 @@ import avatar from "../../../public/simple-user-default-icon-free-png.webp";
 import { LuPlus } from "react-icons/lu";
 import { deleteUser } from "../../services/adminDashboard";
 import instance from "../../services/axios";
+import { fetchDepartments } from "../../services/department";
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
@@ -27,7 +28,17 @@ const EmployeeList = () => {
     photo: null,
     documents: [],
   });
+  const [departments, setDepartments] = useState([]);
 
+  useEffect(() => {
+    const loadDepartments = async () => {
+      const data = await fetchDepartments();
+      setDepartments(data);
+    };
+    loadDepartments();
+  }, []);
+
+  
   useEffect(() => {
     const load = async () => {
       const data = await fetchEmployees();
@@ -39,21 +50,23 @@ const EmployeeList = () => {
   const handleDelete = async () => {
     try {
       if (deleteId?.userId?._id) {
-        // If userId is present, delete from /admin route (will delete both user + employee)
-        await deleteUser(deleteId.userId._id); // ✅ Correct — but ensure the backend route also deletes employee by userId
-        setEmployees((prev) => prev.filter((emp) => emp._id !== deleteId._id));
+        // Delete both user and employee
+        await Promise.all([
+          deleteUser(deleteId.userId._id),
+          deleteEmployee(deleteId._id),
+        ]);
+        toast.success("User and employee deleted successfully");
       } else {
-        // If no userId, delete only the employee from /employees route
+        // Unregistered employee → delete employee only
         await deleteEmployee(deleteId._id);
+        toast.success("Employee deleted successfully");
       }
-
-      toast.success("Employee deleted successfully");
 
       // Update state
       setEmployees((prev) => prev.filter((emp) => emp._id !== deleteId._id));
     } catch (err) {
-      toast.error("Failed to delete employee");
-      console.error(err);
+      toast.error("Failed to delete");
+      console.error("Delete error:", err);
     } finally {
       setDeleteId(null);
     }
@@ -65,12 +78,50 @@ const EmployeeList = () => {
       fullName: emp.fullName || "",
       email: emp.email || "",
       phone: emp.phone || "",
+      department: emp.department || "",
+      role: emp.userId?.role || "",
     });
   };
 
   const handleEditSave = async () => {
     try {
-      await updateEmployee(editData._id, formData);
+      const formDataToSend = new FormData();
+
+      formDataToSend.append("fullName", formData.fullName);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phone);
+
+      if (formData.department) {
+        formDataToSend.append("department", formData.department);
+      }
+
+      if (formData.photo instanceof File) {
+        formDataToSend.append("photo", formData.photo);
+      }
+
+      if (formData.documents?.length) {
+        for (let doc of formData.documents) {
+          if (doc instanceof File) {
+            formDataToSend.append("documents", doc);
+          }
+        }
+      }
+
+      // 🔄 First: Update employee data
+      await instance.patch(`/employees/${editData._id}`, formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // ✅ Then: Update role only if user is registered and role is selected
+      if (editData.userId && formData.role) {
+        await instance.patch("/admin/set-role", {
+          userId: editData.userId,
+          role: formData.role,
+        });
+      }
+
       const updated = employees.map((emp) =>
         emp._id === editData._id ? { ...emp, ...formData } : emp
       );
@@ -185,17 +236,20 @@ const EmployeeList = () => {
                 className="w-full text-sm"
               />
 
-              <input
-                type="file"
-                multiple
+              <select
+                value={formData.department || ""}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    documents: Array.from(e.target.files),
-                  })
+                  setFormData({ ...formData, department: e.target.value })
                 }
-                className="w-full text-sm"
-              />
+                className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
+              >
+                <option value="">Select Department</option>
+                {departments.map((dept) => (
+                  <option key={dept._id} value={dept._id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
 
               <div className="flex justify-end gap-3 pt-2">
                 <button
@@ -235,7 +289,7 @@ const EmployeeList = () => {
               >
                 <td className="px-6 py-4 flex items-center gap-3">
                   <img
-                    src={emp.photo || avatar}
+                    src={emp.imageUrl || avatar}
                     alt={emp.fullName}
                     className="w-8 h-8 rounded-full object-cover"
                   />
@@ -281,8 +335,8 @@ const EmployeeList = () => {
                 Cancel
               </button>
               <button
-                onClick={() => handleDelete(deleteId?.userId?._id)}
-                disabled={!deleteId?.userId?._id}
+                onClick={handleDelete}
+                disabled={!deleteId?._id}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
               >
                 Delete
@@ -327,6 +381,35 @@ const EmployeeList = () => {
                 setFormData({ ...formData, phone: e.target.value })
               }
             />
+            <select
+              value={formData.department || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, department: e.target.value })
+              }
+              className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
+            >
+              <option value="">Select Department</option>
+              {departments.map((dept) => (
+                <option key={dept._id} value={dept._id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
+              value={formData.role || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, role: e.target.value })
+              }
+              disabled={!editData?.userId} // disable if user not registered
+            >
+              <option value="" disabled>
+                Select Role
+              </option>
+              <option value="Admin">Admin</option>
+              <option value="Employee">Employee</option>
+            </select>
 
             <div className="flex justify-end gap-3 pt-2">
               <button

@@ -15,7 +15,7 @@ const router = express.Router();
 router.use(protect, isAdmin);
 
 // Create new department
-router.post("/", createDepartment);
+router.post("/create", createDepartment);
 
 // Get all departments
 router.get("/", getAllDepartments);

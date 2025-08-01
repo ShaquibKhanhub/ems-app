@@ -61,23 +61,36 @@ export const getEmployeeById = async (req, res) => {
 
 export const updateEmployee = async (req, res) => {
   try {
-    const updates = req.body;
+    const updates = {};
 
+    // Basic fields
+    if (req.body.fullName) updates.fullName = req.body.fullName;
+    if (req.body.email) updates.email = req.body.email;
+    if (req.body.phone) updates.phone = req.body.phone;
+
+    // Optional department and role
+    if (req.body.department) updates.department = req.body.department;
+    if (req.body.role) updates.role = req.body.role;
+
+    // Optional photo
     if (req.files?.photo?.[0]) {
       updates.imageUrl = req.files.photo[0].path;
     }
 
+    // Optional documents
     if (req.files?.documents?.length) {
       updates.documents = req.files.documents.map((file) => file.path);
     }
 
     const updatedEmployee = await Employee.findByIdAndUpdate(
       req.params.id,
-      updates,
-      {
-        new: true,
-      }
+      { $set: updates },
+      { new: true }
     );
+
+    if (!updatedEmployee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
 
     res.json(updatedEmployee);
   } catch (err) {
@@ -85,7 +98,19 @@ export const updateEmployee = async (req, res) => {
   }
 };
 
+// export const deleteEmployee = async (req, res) => {
+//   await Employee.findByIdAndDelete(req.params.id);
+//   res.json({ message: "Deleted" });
+// };
+
 export const deleteEmployee = async (req, res) => {
-  await Employee.findByIdAndDelete(req.params.id);
-  res.json({ message: "Deleted" });
+  console.log("Deleting employee with ID:", req.params.id);
+
+  const deleted = await Employee.findByIdAndDelete(req.params.id);
+
+  if (!deleted) {
+    return res.status(404).json({ message: "Employee not found" });
+  }
+
+  res.json({ message: "Deleted successfully" });
 };

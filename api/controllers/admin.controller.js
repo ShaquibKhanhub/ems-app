@@ -1,4 +1,5 @@
 import moment from "moment";
+import asyncHandler from "express-async-handler";
 
 // 🔁 Promote or Demote an employee
 import User from "../models/user.model.js";
@@ -35,25 +36,24 @@ export const getDashboardStats = async (req, res) => {
   });
 };
 
-export const deleteUserAndEmployee = async (req, res) => {
-  try {
-    const user = await User.findByIdAndDelete(req.params.id);
+export const deleteUserAndEmployee = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
 
-    if (user) {
-      // ✅ If user has an employeeId, delete employee directly
-      if (user.employeeId) {
-        await Employee.findByIdAndDelete(user.employeeId);
-      } else {
-        // ✅ Else try to delete employee where userId matches
-        await Employee.findOneAndDelete({ userId: user._id });
-      }
-
-      return res.json({ message: "User and linked employee deleted" });
-    }
-
-    // If user not found
-    return res.status(404).json({ message: "User not found" });
-  } catch (err) {
-    return res.status(500).json({ message: "Deletion failed", error: err.message });
+  const user = await User.findById(userId);
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
   }
-};
+
+  const employee = await Employee.findOne({ user: userId });
+
+  // Delete employee first
+  if (employee) {
+    await employee.deleteOne(); // or remove()
+  }
+
+  // Now delete the user
+  await user.deleteOne(); // or remove()
+
+  res.status(200).json({ message: "User and linked employee deleted" });
+});

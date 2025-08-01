@@ -43,7 +43,7 @@ export const fetchEmployeesByDepartment = async () => {
   return res.data;
 };
 
-export const deleteUser = async (userId) => {
-  const res = await instance.delete(`/admin/${userId}`);
-  return res.data;
+export const deleteUser = async (id) => {
+  const { data } = await instance.delete(`/admin/${id}`);
+  return data;
 };
