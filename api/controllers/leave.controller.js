@@ -5,7 +5,7 @@ import { sendEmail } from "../utils/email.js";
 
 export const getAllLeaves = async (req, res) => {
   try {
-    const leaves = await Leave.find(); 
+    const leaves = await Leave.find().populate("employeeId", "fullName email");
     res.json(leaves);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch leaves", error });
@@ -23,58 +23,81 @@ export const getEmployeeLeaves = async (req, res) => {
 };
 
 export const approveLeave = async (req, res) => {
-  const leave = await Leave.findByIdAndUpdate(
-    req.params.id,
-    { status: "Approved" },
-    { new: true }
-  ).populate("employeeId");
+  try {
+    let leave = await Leave.findByIdAndUpdate(
+      req.params.id,
+      { status: "Approved" },
+      { new: true }
+    );
 
-  if (!leave) return res.status(404).json({ message: "Leave not found" });
+    if (!leave) return res.status(404).json({ message: "Leave not found" });
 
-  const from = leave.fromDate
-    ? new Date(leave.fromDate).toLocaleDateString()
-    : "N/A";
+    leave = await leave.populate("employeeId", "email fullName");
 
-  const to = leave.endDate
-    ? new Date(leave.endDate).toLocaleDateString()
-    : "N/A";
+    const from = leave.fromDate
+      ? new Date(leave.fromDate).toLocaleDateString()
+      : "N/A";
+    const to = leave.endDate
+      ? new Date(leave.endDate).toLocaleDateString()
+      : "N/A";
 
-  if (leave.employeeId?.email) {
-    await sendEmail({
-      to: leave.employeeId.email,
-      subject: "✅ Your Leave Has Been Approved",
-      html: `<p>Your leave request from <strong>${from}</strong> to <strong>${to}</strong> has been <strong>approved</strong>.</p>`,
-    });
+    if (leave.employeeId?.email) {
+      try {
+        await sendEmail({
+          to: leave.employeeId.email,
+          subject: "✅ Your Leave Has Been Approved",
+          html: `<p>Hello <strong>${leave.employeeId.fullName}</strong>,<br/>
+          Your leave request from <strong>${from}</strong> to <strong>${to}</strong> has been <strong>approved</strong>.</p>`,
+        });
+      } catch (err) {
+        console.error("Email send failed:", err.message);
+      }
+    }
+
+    res.json(leave);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to approve leave", error: err.message });
   }
-
-  res.json(leave);
 };
 
 export const rejectLeave = async (req, res) => {
-  const leave = await Leave.findByIdAndUpdate(
-    req.params.id,
-    { status: "Rejected" },
-    { new: true }
-  ).populate("employeeId");
+  try {
+    let leave = await Leave.findByIdAndUpdate(
+      req.params.id,
+      { status: "Rejected" },
+      { new: true }
+    );
 
-  if (!leave) return res.status(404).json({ message: "Leave not found" });
+    if (!leave) return res.status(404).json({ message: "Leave not found" });
 
-  const { fromDate, endDate, employeeId } = leave;
-  const from = fromDate ? new Date(fromDate).toLocaleDateString() : "N/A";
+    leave = await leave.populate("employeeId", "email fullName");
 
-  const to = endDate ? new Date(endDate).toLocaleDateString() : "N/A";
+    const from = leave.fromDate
+      ? new Date(leave.fromDate).toLocaleDateString()
+      : "N/A";
+    const to = leave.endDate
+      ? new Date(leave.endDate).toLocaleDateString()
+      : "N/A";
 
-  if (employeeId?.email) {
-    console.log("leave:", leave);
-    console.log("leave.fromDate:", leave.fromDate);
-    console.log("leave.endDate:", leave.endDate);
+    if (leave.employeeId?.email) {
+      try {
+        await sendEmail({
+          to: leave.employeeId.email,
+          subject: "❌ Your Leave Has Been Rejected",
+          html: `<p>Hello <strong>${leave.employeeId.fullName}</strong>,<br/>
+          Your leave request from <strong>${from}</strong> to <strong>${to}</strong> has been <strong>rejected</strong>.</p>`,
+        });
+      } catch (err) {
+        console.error("Email send failed:", err.message);
+      }
+    }
 
-    await sendEmail({
-      to: employeeId.email,
-      subject: "❌ Your Leave Has Been Rejected",
-      html: `<p>Your leave request from <strong>${from}</strong> to <strong>${to}</strong> has been <strong>rejected</strong>.</p>`,
-    });
+    res.json(leave);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to reject leave", error: err.message });
   }
-
-  res.json(leave);
 };

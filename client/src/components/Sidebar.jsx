@@ -28,7 +28,7 @@ const Sidebar = ({ onLogout, open, setOpen, role = "Admin" }) => {
           { to: "/dashboard", label: "Dashboard", icon: <FaTachometerAlt /> },
           { to: "/tasks", label: "My Tasks", icon: <FaTasks /> },
           { to: "/attendance", label: "Attendance", icon: <FaCalendarCheck /> },
-          { to: "/leaves", label: "Leave Requests", icon: <FaEnvelopeOpenText /> },
+          { to: "/leave/apply", label: "Leave Requests", icon: <FaEnvelopeOpenText /> },
         ];
 
   const title = role === "Admin" ? "Admin Panel" : "Employee Panel";

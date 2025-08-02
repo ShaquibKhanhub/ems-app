@@ -11,7 +11,9 @@ import { LuPlus } from "react-icons/lu";
 const DepartmentList = () => {
   const [departments, setDepartments] = useState([]);
   const [newDept, setNewDept] = useState("");
+
   const [showAddModal, setShowAddModal] = useState(false);
+  const [deleteDept, setDeleteDept] = useState(null);
 
   const [editDept, setEditDept] = useState(null);
   const [editName, setEditName] = useState("");
@@ -63,9 +65,11 @@ const DepartmentList = () => {
   };
   return (
     <div className="text-white space-y-4">
+      {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-black">Departments</h2>
-
+        <h2 className="text-2xl font-bold text-black dark:text-white">
+          Departments
+        </h2>
         <button
           className="flex items-center gap-2 bg-[#1f1f1f] text-white px-4 py-2 rounded-full hover:bg-[#2a2a2a] transition"
           onClick={() => setShowAddModal(true)}
@@ -75,9 +79,10 @@ const DepartmentList = () => {
         </button>
       </div>
 
-      <div className="overflow-x-auto border border-gray-700 bg-black rounded shadow">
+      {/* Table */}
+      <div className="overflow-x-auto border border-gray-700 bg-[#0f0f0f] rounded-lg shadow">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-900 text-left text-gray-300">
+          <thead className="bg-[#1f1f1f] text-left text-gray-300">
             <tr>
               <th className="p-4">Name</th>
               <th className="p-4 text-center">Actions</th>
@@ -87,7 +92,7 @@ const DepartmentList = () => {
             {departments.map((dept) => (
               <tr
                 key={dept._id}
-                className="border-t border-gray-800 hover:bg-gray-800"
+                className="border-t border-gray-800 hover:bg-[#1a1a1a]"
               >
                 <td className="p-4">{dept.name}</td>
                 <td className="p-4 text-center space-x-2">
@@ -98,7 +103,7 @@ const DepartmentList = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(dept._id)}
+                    onClick={() => setDeleteDept(dept)}
                     className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
                   >
                     Delete
@@ -110,11 +115,13 @@ const DepartmentList = () => {
         </table>
       </div>
 
-      {/* Add Modal */}
+      {/* Add Department Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-xl w-[90%] max-w-sm text-white">
-            <h2 className="text-lg font-semibold mb-4">Add Department</h2>
+          <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-xl w-[90%] max-w-sm">
+            <h2 className="text-lg font-semibold mb-4 text-white">
+              Add Department
+            </h2>
             <input
               className="w-full p-3 mb-4 bg-[#1a1a1a] text-white rounded-md border border-neutral-700 placeholder-neutral-500 focus:outline-none"
               placeholder="Department Name"
@@ -124,7 +131,7 @@ const DepartmentList = () => {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 bg-neutral-800 rounded hover:bg-neutral-700 transition"
+                className="px-4 py-2 bg-neutral-800 text-white rounded hover:bg-neutral-700 transition"
               >
                 Cancel
               </button>
@@ -139,10 +146,13 @@ const DepartmentList = () => {
         </div>
       )}
 
+      {/* Edit Department Modal */}
       {editDept && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-xl w-[90%] max-w-sm text-white">
-            <h2 className="text-lg font-semibold mb-4">Edit Department</h2>
+          <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-xl w-[90%] max-w-sm">
+            <h2 className="text-lg font-semibold mb-4 text-white">
+              Edit Department
+            </h2>
             <input
               className="w-full p-3 mb-4 bg-[#1a1a1a] text-white rounded-md border border-neutral-700 placeholder-neutral-500 focus:outline-none"
               placeholder="Department Name"
@@ -152,7 +162,7 @@ const DepartmentList = () => {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setEditDept(null)}
-                className="px-4 py-2 bg-neutral-800 rounded hover:bg-neutral-700 transition"
+                className="px-4 py-2 bg-neutral-800 text-white rounded hover:bg-neutral-700 transition"
               >
                 Cancel
               </button>
@@ -161,6 +171,35 @@ const DepartmentList = () => {
                 className="px-4 py-2 bg-white text-black rounded hover:bg-neutral-200 transition"
               >
                 Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteDept && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-xl w-[90%] max-w-sm text-white">
+            <h2 className="text-lg font-semibold mb-4">Delete Department</h2>
+            <p className="mb-4 text-sm text-gray-300">
+              Are you sure you want to delete{" "}
+              <span className="font-bold">{deleteDept.name}</span>?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteDept(null)}
+                className="px-4 py-2 bg-neutral-800 rounded hover:bg-neutral-700 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  await handleDelete(deleteDept._id);
+                  setDeleteDept(null);
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+              >
+                Confirm
               </button>
             </div>
           </div>
