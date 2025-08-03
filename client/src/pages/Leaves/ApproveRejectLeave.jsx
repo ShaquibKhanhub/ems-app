@@ -9,6 +9,9 @@ const LeaveRequests = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [leaveTypeFilter, setLeaveTypeFilter] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // or 10, whatever you prefer
+
   const fetchLeaves = async () => {
     try {
       const { data } = await instance.get("/leaves");
@@ -32,6 +35,12 @@ const LeaveRequests = () => {
 
     return matchesSearch && statusMatch && typeMatch;
   });
+
+  const totalPages = Math.ceil(filteredLeaves.length / itemsPerPage);
+  const paginatedLeaves = filteredLeaves.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const updateLeaveStatus = async (id, action) => {
     try {
@@ -301,7 +310,7 @@ const LeaveRequests = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredLeaves.map((leave) => (
+            {paginatedLeaves.map((leave) => (
               <tr
                 key={leave._id}
                 className="border-t border-neutral-800 hover:bg-neutral-900"
@@ -322,7 +331,7 @@ const LeaveRequests = () => {
                   <button
                     disabled={leave.status === "Approved"}
                     onClick={() => updateLeaveStatus(leave._id, "approve")}
-                    className="bg-white text-black px-3 py-1 rounded hover:bg-green-700 disabled:opacity-50"
+                    className="bg-white text-black px-3 py-1 rounded hover:bg-gray-100 disabled:opacity-50"
                   >
                     Approve
                   </button>
@@ -345,6 +354,41 @@ const LeaveRequests = () => {
             )}
           </tbody>
         </table>
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-4 pb-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 bg-neutral-800 text-white rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+
+            {[...Array(totalPages)].map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentPage(idx + 1)}
+                className={`px-3 py-1 rounded ${
+                  currentPage === idx + 1
+                    ? "bg-white text-black hover:bg-gray-200  "
+                    : "bg-neutral-800 text-gray-300 hover:bg-neutral-700 hover:text-white"
+                }`}
+              >
+                {idx + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 bg-neutral-800 text-white rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

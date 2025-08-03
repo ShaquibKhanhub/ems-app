@@ -27,6 +27,7 @@ import MyAttendance from "../pages/Attendance/MyAttendance";
 import TaskList from "../pages/Tasks/TaskList";
 
 import NotFound from "../pages/NotFound";
+import AdminAttendance from "../pages/Attendance/Admin/AdminView";
 
 const AppRoutes = () => {
   return (
@@ -57,7 +58,7 @@ const AppRoutes = () => {
             <Route path="/admin/leaves" element={<ApproveRejectLeave />} />
             <Route path="/admin/tasks/create" element={<AssignTask />} />
             <Route path="/admin/reports" element={<ReportPage />} />
-            <Route path="/admin/attendance" element={<MarkAttendance />} />
+            <Route path="/admin/attendance" element={<AdminAttendance />} />
             <Route path="/admin/attendance/view" element={<MyAttendance />} />
             <Route path="/admin/tasks" element={<TaskList />} />
             
