@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { Outlet } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -22,6 +23,7 @@ const AdminLayout = () => {
           sidebarOpen ? "ml-64" : "ml-16"
         } w-full p-6`}
       >
+         <Navbar />
         <Outlet />
       </div>
     </div>

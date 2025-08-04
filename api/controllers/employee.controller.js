@@ -48,7 +48,7 @@ export const createEmployee = async (req, res) => {
 export const getAllEmployees = async (req, res) => {
   const employees = await Employee.find()
     .populate("department")
-    .populate("userId", "username email role");
+    .populate("userId", "username email role ");
   res.json(employees);
 };
 
@@ -67,6 +67,7 @@ export const updateEmployee = async (req, res) => {
     if (req.body.fullName) updates.fullName = req.body.fullName;
     if (req.body.email) updates.email = req.body.email;
     if (req.body.phone) updates.phone = req.body.phone;
+    if (req.body.gender) updates.gender = req.body.gender; // ✅ Add this
 
     // Optional department and role
     if (req.body.department) updates.department = req.body.department;
@@ -75,6 +76,8 @@ export const updateEmployee = async (req, res) => {
     // Optional photo
     if (req.files?.photo?.[0]) {
       updates.imageUrl = req.files.photo[0].path;
+    } else if (req.body.imageUrl) {
+      updates.imageUrl = req.body.imageUrl; // ✅ Fallback to body if no file
     }
 
     // Optional documents
@@ -97,6 +100,7 @@ export const updateEmployee = async (req, res) => {
     res.status(500).json({ message: "Update failed", error: err.message });
   }
 };
+
 
 // export const deleteEmployee = async (req, res) => {
 //   await Employee.findByIdAndDelete(req.params.id);

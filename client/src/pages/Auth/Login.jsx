@@ -24,7 +24,7 @@ const Login = () => {
       } else {
         navigate("/dashboard");
       }
-toast.success("Login successful!");
+      toast.success("Login successful!");
       localStorage.setItem("employee", JSON.stringify(res.user)); // Common for both
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");

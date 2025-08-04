@@ -28,10 +28,12 @@ import TaskList from "../pages/Tasks/TaskList";
 
 import NotFound from "../pages/NotFound";
 import AdminAttendance from "../pages/Attendance/Admin/AdminView";
+import Navbar from "../components/Navbar";
 
 const AppRoutes = () => {
   return (
     <Routes>
+  
       {/* Redirect root to login */}
       <Route path="/" element={<Navigate to="/login" />} />
 

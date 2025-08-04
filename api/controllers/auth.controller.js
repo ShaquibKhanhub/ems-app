@@ -10,7 +10,8 @@ export const login = async (req, res) => {
   const { username, password } = req.body;
 
   // Find user by username (email)
-  const user = await User.findOne({ username });
+  const user = await User.findOne({ username }).populate("employeeId");
+
   if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
   // Compare hashed password
@@ -25,6 +26,10 @@ export const login = async (req, res) => {
       _id: user._id,
       username: user.username,
       role: user.role,
+      employeeId: user.employeeId,
+      imageUrl: user.employeeId?.imageUrl || null,
+      fullName: user.employeeId?.fullName || null,
+      phone: user.employeeId?.phone || null,
     },
     token,
   });

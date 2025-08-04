@@ -38,7 +38,6 @@ const EmployeeList = () => {
     loadDepartments();
   }, []);
 
-  
   useEffect(() => {
     const load = async () => {
       const data = await fetchEmployees();
@@ -192,82 +191,83 @@ const EmployeeList = () => {
           Create
         </button>
 
-        {showCreateModal && (
-          <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-60 z-50">
-            <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-2xl w-[90%] max-w-md text-white space-y-4">
-              <h2 className="text-xl font-semibold">Create Employee</h2>
+       {showCreateModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="bg-white text-black p-6 rounded-xl shadow-2xl w-[90%] max-w-md space-y-4 border border-neutral-200">
+      <h2 className="text-xl font-semibold">Create Employee</h2>
 
-              <input
-                type="email"
-                placeholder="Email *"
-                className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-              />
+      <input
+        type="email"
+        placeholder="Email *"
+        className="w-full p-3 rounded border border-neutral-300 placeholder:text-neutral-500"
+        value={formData.email}
+        onChange={(e) =>
+          setFormData({ ...formData, email: e.target.value })
+        }
+      />
 
-              <input
-                type="text"
-                placeholder="Full Name"
-                className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
-                value={formData.fullName}
-                onChange={(e) =>
-                  setFormData({ ...formData, fullName: e.target.value })
-                }
-              />
+      <input
+        type="text"
+        placeholder="Full Name"
+        className="w-full p-3 rounded border border-neutral-300 placeholder:text-neutral-500"
+        value={formData.fullName}
+        onChange={(e) =>
+          setFormData({ ...formData, fullName: e.target.value })
+        }
+      />
 
-              <input
-                type="text"
-                placeholder="Phone"
-                className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-              />
+      <input
+        type="text"
+        placeholder="Phone"
+        className="w-full p-3 rounded border border-neutral-300 placeholder:text-neutral-500"
+        value={formData.phone}
+        onChange={(e) =>
+          setFormData({ ...formData, phone: e.target.value })
+        }
+      />
 
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  setFormData({ ...formData, photo: e.target.files[0] })
-                }
-                className="w-full text-sm"
-              />
+      <input
+        type="file"
+        accept="image/*"
+        className="w-full text-sm text-neutral-700"
+        onChange={(e) =>
+          setFormData({ ...formData, photo: e.target.files[0] })
+        }
+      />
 
-              <select
-                value={formData.department || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, department: e.target.value })
-                }
-                className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
-              >
-                <option value="">Select Department</option>
-                {departments.map((dept) => (
-                  <option key={dept._id} value={dept._id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
+      <select
+        value={formData.department || ""}
+        onChange={(e) =>
+          setFormData({ ...formData, department: e.target.value })
+        }
+        className="w-full p-3 rounded border border-neutral-300 text-black"
+      >
+        <option value="">Select Department</option>
+        {departments.map((dept) => (
+          <option key={dept._id} value={dept._id}>
+            {dept.name}
+          </option>
+        ))}
+      </select>
 
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  className="px-4 py-2 rounded border border-neutral-700 bg-[#1a1a1a] hover:bg-[#2a2a2a]"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="px-4 py-2 rounded bg-white text-black hover:bg-neutral-200"
-                  onClick={handleCreateEmployee}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="flex justify-end gap-3 pt-2">
+        <button
+          className="px-4 py-2 rounded border border-neutral-300 bg-white hover:bg-neutral-100 transition"
+          onClick={() => setShowCreateModal(false)}
+        >
+          Cancel
+        </button>
+        <button
+          className="px-4 py-2 rounded bg-black text-white hover:bg-neutral-800 transition"
+          onClick={handleCreateEmployee}
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-neutral-800 bg-[#111]">
@@ -322,24 +322,40 @@ const EmployeeList = () => {
       {/* Delete Modal */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-xl w-[90%] max-w-sm text-white">
-            <h2 className="text-lg font-semibold mb-3">Confirm Deletion</h2>
-            <p className="text-sm text-neutral-400 mb-5">
-              Are you sure you want to delete {deleteId?.fullName}?
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="px-4 py-2 bg-neutral-800 rounded hover:bg-neutral-700 transition"
-              >
-                Cancel
-              </button>
+          <div className="bg-white rounded-xl p-6 w-[90%] max-w-md relative text-center shadow-xl">
+            {/* Close Button */}
+            <button
+              onClick={() => setDeleteId(null)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-black text-xl font-semibold"
+            >
+              &times;
+            </button>
+
+            {/* Icon */}
+            <div className="w-14 h-14 mx-auto mb-4 flex items-center justify-center rounded-full border-4 border-gray-300">
+              <span className="text-3xl text-gray-500">!</span>
+            </div>
+
+            {/* Text */}
+            <h2 className="text-gray-700 text-lg mb-4">
+              Are you sure you want to delete{" "}
+              <span className="font-semibold">{deleteId?.fullName}</span>?
+            </h2>
+
+            {/* Buttons */}
+            <div className="flex justify-center gap-4 mt-4">
               <button
                 onClick={handleDelete}
                 disabled={!deleteId?._id}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
+                className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-md"
               >
-                Delete
+                Yes, I'm sure
+              </button>
+              <button
+                onClick={() => setDeleteId(null)}
+                className="bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-5 py-2 rounded-md"
+              >
+                No, cancel
               </button>
             </div>
           </div>
@@ -347,87 +363,89 @@ const EmployeeList = () => {
       )}
 
       {/* Edit Modal */}
-      {editData && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-[#111] p-6 rounded-xl border border-neutral-800 shadow-2xl w-[90%] max-w-md text-white space-y-4">
-            <h2 className="text-xl font-semibold">Edit Employee</h2>
+    {editData && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white text-black p-6 rounded-xl border border-neutral-300 shadow-2xl w-[90%] max-w-md space-y-4">
+      <h2 className="text-xl font-semibold">Edit Employee</h2>
 
-            <input
-              type="text"
-              placeholder="Full Name"
-              className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
-              value={formData.fullName}
-              onChange={(e) =>
-                setFormData({ ...formData, fullName: e.target.value })
-              }
-            />
+      <input
+        type="text"
+        placeholder="Full Name"
+        className="w-full p-3 bg-white rounded border border-neutral-300"
+        value={formData.fullName}
+        onChange={(e) =>
+          setFormData({ ...formData, fullName: e.target.value })
+        }
+      />
 
-            <input
-              type="email"
-              placeholder="Email"
-              className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-            />
+      <input
+        type="email"
+        placeholder="Email"
+        className="w-full p-3 bg-white rounded border border-neutral-300"
+        value={formData.email}
+        onChange={(e) =>
+          setFormData({ ...formData, email: e.target.value })
+        }
+      />
 
-            <input
-              type="text"
-              placeholder="Phone"
-              className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-            />
-            <select
-              value={formData.department || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, department: e.target.value })
-              }
-              className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
-            >
-              <option value="">Select Department</option>
-              {departments.map((dept) => (
-                <option key={dept._id} value={dept._id}>
-                  {dept.name}
-                </option>
-              ))}
-            </select>
+      <input
+        type="text"
+        placeholder="Phone"
+        className="w-full p-3 bg-white rounded border border-neutral-300"
+        value={formData.phone}
+        onChange={(e) =>
+          setFormData({ ...formData, phone: e.target.value })
+        }
+      />
 
-            <select
-              className="w-full p-3 bg-[#1a1a1a] rounded border border-neutral-700"
-              value={formData.role || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, role: e.target.value })
-              }
-              disabled={!editData?.userId} // disable if user not registered
-            >
-              <option value="" disabled>
-                Select Role
-              </option>
-              <option value="Admin">Admin</option>
-              <option value="Employee">Employee</option>
-            </select>
+      <select
+        value={formData.department || ""}
+        onChange={(e) =>
+          setFormData({ ...formData, department: e.target.value })
+        }
+        className="w-full p-3 bg-white rounded border border-neutral-300"
+      >
+        <option value="">Select Department</option>
+        {departments.map((dept) => (
+          <option key={dept._id} value={dept._id}>
+            {dept.name}
+          </option>
+        ))}
+      </select>
 
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                className="px-4 py-2 rounded border border-neutral-700 bg-[#1a1a1a] hover:bg-[#2a2a2a]"
-                onClick={() => setEditData(null)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 rounded bg-white text-black hover:bg-neutral-200"
-                onClick={handleEditSave}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <select
+        className="w-full p-3 bg-white rounded border border-neutral-300"
+        value={formData.role || ""}
+        onChange={(e) =>
+          setFormData({ ...formData, role: e.target.value })
+        }
+        disabled={!editData?.userId}
+      >
+        <option value="" disabled>
+          Select Role
+        </option>
+        <option value="Admin">Admin</option>
+        <option value="Employee">Employee</option>
+      </select>
+
+      <div className="flex justify-end gap-3 pt-2">
+        <button
+          className="px-4 py-2 rounded border border-neutral-300 bg-white hover:bg-neutral-100"
+          onClick={() => setEditData(null)}
+        >
+          Cancel
+        </button>
+        <button
+          className="px-4 py-2 rounded bg-black text-white hover:bg-neutral-800"
+          onClick={handleEditSave}
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
