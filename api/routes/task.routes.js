@@ -5,6 +5,7 @@ import {
   updateTaskStatus,
   addTaskComment,
   getAllTasks,
+  archiveTask,
 } from "../controllers/task.controller.js";
 
 import { verifyToken } from "../middleware/verifyToken.js";
@@ -26,6 +27,9 @@ router.patch("/:id/status", updateTaskStatus);
 
 // ✅ Add comment to task
 router.post("/:id/comments", addTaskComment);
+
+router.patch("/:id/archive", isAdmin, archiveTask);
+
 
 // 👇 Admin-only route
 router.get("/", isAdmin, getAllTasks); // ✅ Get all tasks

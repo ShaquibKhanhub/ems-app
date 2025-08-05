@@ -39,6 +39,15 @@ export const addTaskComment = async (req, res) => {
 };
 
 export const getAllTasks = async (req, res) => {
-  const tasks = await Task.find().populate("assignedTo").populate("assignedBy");
+  const tasks = await Task.find({ isArchived: false }).populate(
+    "assignedTo assignedBy"
+  );
+
   res.json(tasks);
+};
+
+
+export const archiveTask = async (req, res) => {
+  await Task.findByIdAndUpdate(req.params.id, { isArchived: true });
+  res.json({ message: "Task archived" });
 };

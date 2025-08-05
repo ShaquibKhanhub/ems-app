@@ -64,7 +64,7 @@ const DepartmentList = () => {
     }
   };
   return (
-    <div className="text-white space-y-4">
+    <div className="text-white space-y-4 py-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-black dark:text-white">

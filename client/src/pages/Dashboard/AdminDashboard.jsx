@@ -99,7 +99,7 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="text-black space-y-6">
+    <div className="text-black space-y-6 py-6">
       <h2 className="text-2xl font-bold">Welcome Admin</h2>
 
       {/* Stats Cards */}
