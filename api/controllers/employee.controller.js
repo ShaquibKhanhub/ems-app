@@ -48,7 +48,7 @@ export const createEmployee = async (req, res) => {
 export const getAllEmployees = async (req, res) => {
   const employees = await Employee.find()
     .populate("department")
-    .populate("userId", "username email role ");
+    .populate("userId", "username email role employeeId");
   res.json(employees);
 };
 

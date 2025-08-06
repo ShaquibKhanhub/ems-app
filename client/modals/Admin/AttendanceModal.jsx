@@ -9,6 +9,7 @@ import {
   format,
   startOfWeek,
   endOfWeek,
+  isSameMonth,
 } from "date-fns";
 import { BsCalendarCheck, BsCalendarX, BsCalendarMinus } from "react-icons/bs";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
@@ -34,7 +35,6 @@ const AttendanceModal = ({ employeeId, onClose }) => {
               : "absent",
           clockIn: entry.clockIn,
           clockOut: entry.clockOut,
-          full: entry,
         };
       });
       setAttendance(data);
@@ -92,9 +92,9 @@ const AttendanceModal = ({ employeeId, onClose }) => {
       printWindow.document.write(`
         <html>
           <head><title>Attendance</title><style>
-          body{font-family:sans-serif;padding:20px}
-          .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-          .cell{padding:6px;border-radius:6px;text-align:center}
+            body{font-family:sans-serif;padding:20px}
+            .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+            .cell{padding:10px;border-radius:6px;text-align:center;border:1px solid #ccc}
           </style></head>
           <body>${printContent.innerHTML}</body>
         </html>`);
@@ -132,16 +132,18 @@ const AttendanceModal = ({ employeeId, onClose }) => {
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-white/40 z-50 flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-4xl rounded-lg p-6 relative shadow-xl">
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-1  text-gray-600 hover:text-black text-xl px-2"
+          className="absolute top-3 right-1 text-gray-600 hover:text-black text-xl px-2"
         >
           ✕
         </button>
 
+        {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold">
-            Attendance - {format(currentDate, "MMMM yyyy")}
+          <h3 className="text-2xl font-bold">
+            {format(currentDate, "MMMM yyyy")}
           </h3>
           <div className="flex gap-2">
             <button
@@ -171,53 +173,53 @@ const AttendanceModal = ({ employeeId, onClose }) => {
             {calendarDays.map((day) => {
               const key = format(day, "yyyy-MM-dd");
               const dayData = attendance[key];
-              const status =
-                dayData?.status ||
-                (day.getDay() === 0 || day.getDay() === 6
-                  ? "weekend"
-                  : "absent");
+              const isCurrentMonth = isSameMonth(day, currentDate);
+              const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+
+              const status = isCurrentMonth
+                ? dayData?.status || (isWeekend ? "weekend" : "absent")
+                : "";
 
               return (
                 <div
                   key={key}
-                  className={`p-2 rounded-md text-center relative cursor-pointer ${getStatusColor(
-                    status
-                  )} ${isToday(day) ? "ring-2 ring-blue-400" : ""}`}
-                  onClick={() => {
-                    if (dayData) setSelectedDay({ date: key, ...dayData });
-                  }}
-                  title={
-                    dayData?.clockIn || dayData?.clockOut
-                      ? `In: ${dayData.clockIn || "-"} | Out: ${
-                          dayData.clockOut || "-"
-                        }`
-                      : "No data"
-                  }
+                  onClick={() => setSelectedDay(dayData?.full || null)}
+                  className={`p-2 h-[70px] flex items-center justify-center flex-col text-sm rounded-lg cursor-pointer transition-all
+    ${getStatusColor(status)}
+    ${!isSameMonth(day, currentDate) ? "opacity-50" : ""}
+    ${isToday(day) ? "font-bold" : ""}
+    hover:shadow-md`}
                 >
-                  <div className="text-sm">{format(day, "d")}</div>
-                  {getStatusIcon(status)}
+                  <div className="text-sm font-semibold">
+                    {format(day, "d")}
+                  </div>
+                  {getStatusIcon(status) || (
+                    <div className="text-xs text-gray-400">-</div>
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Summary */}
+        {/* Summary and Actions */}
         <div className="mt-6 flex flex-wrap justify-between items-center gap-4">
           <div className="flex gap-4 text-sm">
-            <span className="text-green-700">
-              Present: {statusCounts.present}
+            <span className="text-green-700 font-medium">
+              ✅ Present: {statusCounts.present}
             </span>
-            <span className="text-yellow-700">
-              Partial: {statusCounts.partial}
+            <span className="text-yellow-700 font-medium">
+              🕓 Partial: {statusCounts.partial}
             </span>
-            <span className="text-red-700">Absent: {statusCounts.absent}</span>
+            <span className="text-red-700 font-medium">
+              ❌ Absent: {statusCounts.absent}
+            </span>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-4  ">
             <button
               onClick={handlePrint}
-              className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm"
+              className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm shadow-md hover:shadow-lg"
             >
               Print / Save as PDF
             </button>

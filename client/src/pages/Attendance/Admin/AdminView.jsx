@@ -38,6 +38,8 @@ const AdminAttendancePage = () => {
     setFiltered(data);
   }, [searchTerm, selectedDept, employees]);
 
+  
+
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Employee Attendance</h2>
@@ -101,7 +103,7 @@ const AdminAttendancePage = () => {
       </table>
 
       {selectedEmpId && (
-        <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md">
+        <div className="grid grid-cols-7 gap-2">
           <AttendanceModal
             employeeId={selectedEmpId}
             onClose={() => setSelectedEmpId(null)}
