@@ -10,6 +10,8 @@ const AdminAttendancePage = () => {
   const [selectedDept, setSelectedDept] = useState("all");
   const [selectedEmpId, setSelectedEmpId] = useState(null);
 
+  const [showModal, setShowModal] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       const empRes = await instance.get("/employees");
