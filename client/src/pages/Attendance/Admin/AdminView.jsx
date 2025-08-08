@@ -19,6 +19,7 @@ const AdminAttendancePage = () => {
 
       setEmployees(empRes.data);
       setDepartments(deptRes.data);
+      
       setFiltered(empRes.data);
     };
     fetchData();
